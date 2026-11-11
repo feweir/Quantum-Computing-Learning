@@ -108,8 +108,6 @@
     api.redraw();
     return api;
   };
-  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () =>
-    setTimeout(() => redrawers.forEach((r) => r.redraw()), 50));
 
   // ---- Bloch sphere view (drag to rotate the camera) ----
   Q.BlochView = class {
@@ -130,6 +128,16 @@
         this.yaw += (e.clientX - drag[0]) * 0.01;
         this.pitch = Math.max(-1.4, Math.min(1.4, this.pitch + (e.clientY - drag[1]) * 0.01));
         drag = [e.clientX, e.clientY];
+        this.api.redraw();
+      });
+      canvas.tabIndex = 0;
+      canvas.setAttribute("role", "img");
+      canvas.setAttribute("aria-label", "Bloch sphere. Drag or use arrow keys to rotate the view.");
+      canvas.addEventListener("keydown", (e) => {
+        const d = { ArrowLeft: [-0.1, 0], ArrowRight: [0.1, 0], ArrowUp: [0, -0.1], ArrowDown: [0, 0.1] }[e.key];
+        if (!d) return;
+        e.preventDefault();
+        this.yaw += d[0]; this.pitch = Math.max(-1.4, Math.min(1.4, this.pitch + d[1]));
         this.api.redraw();
       });
       const up = () => { drag = null; canvas.style.cursor = "grab"; };
@@ -173,7 +181,7 @@
       circle((t) => [Math.cos(t), 0, Math.sin(t)], grid);
       circle((t) => [0, Math.cos(t), Math.sin(t)], grid);
       // axes + labels
-      ctx.font = "12px system-ui, sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.font = "12px Geist, system-ui, sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
       const axes = [
         [[1, 0, 0], "|+⟩"], [[-1, 0, 0], "|−⟩"], [[0, 1, 0], "|+i⟩"], [[0, -1, 0], "|−i⟩"],
         [[0, 0, 1], "|0⟩"], [[0, 0, -1], "|1⟩"],

@@ -21,7 +21,7 @@
       ctx.strokeStyle = Q.css("--muted"); ctx.lineWidth = 1.5;
       ctx.beginPath(); ctx.moveTo(0, oy); ctx.lineTo(w, oy); ctx.moveTo(ox, 0); ctx.lineTo(ox, h); ctx.stroke();
       ctx.setLineDash([5, 5]); ctx.beginPath(); ctx.arc(ox, oy, S, 0, TAU); ctx.stroke(); ctx.setLineDash([]);
-      ctx.fillStyle = Q.css("--muted"); ctx.font = "12px system-ui"; ctx.textAlign = "left";
+      ctx.fillStyle = Q.css("--muted"); ctx.font = "12px Geist, system-ui"; ctx.textAlign = "left";
       ctx.fillText("Re", w - 22, oy - 6); ctx.fillText("Im", ox + 6, 12);
       ctx.fillText("unit circle (|z| = 1)", ox + S * 0.72, oy - S * 0.72 - 6);
       const arrow = (p, col, hollow) => {
@@ -63,6 +63,13 @@
     cv.addEventListener("pointerdown", (e) => { down = true; cv.setPointerCapture(e.pointerId); move(e); });
     cv.addEventListener("pointermove", (e) => down && move(e));
     cv.addEventListener("pointerup", () => (down = false));
+    cv.addEventListener("keydown", (e) => {
+      const k = { ArrowLeft: [-0.1, 0], ArrowRight: [0.1, 0], ArrowUp: [0, 0.1], ArrowDown: [0, -0.1] }[e.key];
+      if (!k) return;
+      e.preventDefault();
+      z = [Math.max(-2.3, Math.min(2.3, z[0] + k[0])), Math.max(-2.3, Math.min(2.3, z[1] + k[1]))];
+      view.redraw(); readout();
+    });
     $("cplx-ang").addEventListener("input", (e) => { ang = +e.target.value; view.redraw(); readout(); });
     readout();
   })();
@@ -119,7 +126,7 @@
       const start = psi, my = ++token;
       psi = Q.apply(U, psi); total = Q.matMul(U, total); seq.push({ tex: texName });
       show();
-      const t0 = performance.now(), dur = 650;
+      const t0 = performance.now(), dur = matchMedia("(prefers-reduced-motion: reduce)").matches ? 1 : 650;
       (function step(now) {
         if (my !== token) return;
         const t = Math.min(1, (now - t0) / dur), e = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
@@ -161,7 +168,7 @@
       const p = prob(), L = 42, B = 26, T = 10, Rr = 10, W = w - L - Rr, H = h - B - T;
       const maxN = Math.max(10, N), lx = Math.log10(maxN);
       const X = (n) => L + (Math.log10(Math.max(1, n)) / lx) * W, Y = (v) => T + (1 - v) * H;
-      ctx.font = "11px system-ui"; ctx.fillStyle = Q.css("--muted"); ctx.strokeStyle = Q.css("--grid"); ctx.lineWidth = 1;
+      ctx.font = "11px Geist, system-ui"; ctx.fillStyle = Q.css("--muted"); ctx.strokeStyle = Q.css("--grid"); ctx.lineWidth = 1;
       ctx.textAlign = "right";
       for (let v = 0; v <= 1.001; v += 0.25) { ctx.beginPath(); ctx.moveTo(L, Y(v)); ctx.lineTo(L + W, Y(v)); ctx.stroke(); ctx.fillText(v.toFixed(2), L - 6, Y(v) + 4); }
       ctx.textAlign = "center";
@@ -215,7 +222,7 @@
       const X = (z) => [ox + S * z[0], oy - S * z[1]];
       ctx.strokeStyle = Q.css("--grid"); ctx.lineWidth = 1;
       ctx.beginPath(); ctx.moveTo(8, oy); ctx.lineTo(w - 8, oy); ctx.moveTo(ox, 8); ctx.lineTo(ox, h - 8); ctx.stroke();
-      ctx.fillStyle = Q.css("--muted"); ctx.font = "12px system-ui"; ctx.textAlign = "left";
+      ctx.fillStyle = Q.css("--muted"); ctx.font = "12px Geist, system-ui"; ctx.textAlign = "left";
       ctx.fillText("Re", w - 24, oy - 6); ctx.fillText("Im", ox + 6, 16);
       ctx.fillText("amplitude of |0⟩ in the complex plane", 10, h - 8);
       const a = [0.5, 0], b = C.mul([0.5, 0], C.exp(phi)), s = C.add(a, b);
@@ -235,7 +242,7 @@
     const curve = Q.fit($("pc-cv"), (ctx, w, h) => {
       const phi = +ph.value * PI, L = 40, B = 30, T = 12, R = 12, W = w - L - R, H = h - B - T;
       const X = (t) => L + (t / TAU) * W, Y = (v) => T + (1 - v) * H;
-      ctx.strokeStyle = Q.css("--grid"); ctx.lineWidth = 1; ctx.fillStyle = Q.css("--muted"); ctx.font = "11px system-ui"; ctx.textAlign = "right";
+      ctx.strokeStyle = Q.css("--grid"); ctx.lineWidth = 1; ctx.fillStyle = Q.css("--muted"); ctx.font = "11px Geist, system-ui"; ctx.textAlign = "right";
       for (let v = 0; v <= 1; v += 0.5) { ctx.beginPath(); ctx.moveTo(L, Y(v)); ctx.lineTo(L + W, Y(v)); ctx.stroke(); ctx.fillText(v.toFixed(1), L - 6, Y(v) + 4); }
       ctx.textAlign = "center";
       [["0", 0], ["π", PI], ["2π", TAU]].forEach(([l, t]) => ctx.fillText(l, X(t), h - 12));
