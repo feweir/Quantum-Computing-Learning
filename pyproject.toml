@@ -1,0 +1,17 @@
+[project]
+name = "quantum-course"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+    "cirq>=1.7.0",
+    "jupyter>=1.1.1",
+    "matplotlib>=3.11.2",
+    "numpy>=2.5.4",
+    "pennylane>=0.45.1",
+    "pylatexenc>=2.11",
+    "qiskit>=2.6.2",
+    "qiskit-aer>=0.18.2",
+    "qiskit-ibm-runtime>=0.52.0",
+    "scipy>=1.18.1",
+    "sympy>=1.14.0",
+]

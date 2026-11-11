@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Notation Cheat Sheet</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<link rel="stylesheet" href="../assets/style.css">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
+<script defer src="../assets/course.js"></script>
+</head>
+<body>
+<div style="max-width:900px;margin:0 auto;padding:32px 20px 100px">
+<p><a href="../index.html">← Course home</a></p>
+<h1>Notation cheat sheet</h1>
+<p class="lead">Symbol → how to say it → what it is → numpy equivalent. Grows with each chapter.</p>
+<table>
+<tr><th>Symbol</th><th>Say</th><th>Meaning</th><th>numpy / Python</th></tr>
+<tr><td>$i$</td><td>"i"</td><td>imaginary unit, $i^2=-1$</td><td><code>1j</code></td></tr>
+<tr><td>$\bar z$, $z^*$</td><td>"z conjugate"</td><td>flip sign of imaginary part</td><td><code>z.conjugate()</code></td></tr>
+<tr><td>$\lvert z\rvert$</td><td>"magnitude"</td><td>length of complex number</td><td><code>abs(z)</code></td></tr>
+<tr><td>$e^{i\varphi}$</td><td>"e to the i phi"</td><td>unit-length complex number = rotation by $\varphi$</td><td><code>np.exp(1j*phi)</code></td></tr>
+<tr><td>$\alpha,\beta,\theta,\varphi,\phi,\lambda,\gamma$</td><td>alpha, beta, theta, phi, phi, lambda, gamma</td><td>variable names (amplitudes / angles)</td><td>—</td></tr>
+<tr><td>$\lvert\psi\rangle$</td><td>"ket psi"</td><td>column vector (a state)</td><td><code>psi = np.array([a, b])</code></td></tr>
+<tr><td>$\langle\psi\rvert$</td><td>"bra psi"</td><td>conjugated row vector</td><td><code>psi.conj()</code></td></tr>
+<tr><td>$\langle\phi\vert\psi\rangle$</td><td>"bra-ket"</td><td>inner product (a number)</td><td><code>np.vdot(phi, psi)</code></td></tr>
+<tr><td>$\lvert\phi\rangle\langle\psi\rvert$</td><td>"ket-bra"</td><td>outer product (a matrix)</td><td><code>np.outer(phi, psi.conj())</code></td></tr>
+<tr><td>$U^\dagger$</td><td>"U dagger"</td><td>conjugate transpose</td><td><code>U.conj().T</code></td></tr>
+<tr><td>$U^\dagger U=I$</td><td>"U is unitary"</td><td>reversible, length-preserving</td><td><code>np.allclose(U.conj().T@U, np.eye(2))</code></td></tr>
+<tr><td>$\langle\psi\vert M\vert\psi\rangle$</td><td>"expectation of M"</td><td>average measurement outcome</td><td><code>psi.conj() @ M @ psi</code></td></tr>
+<tr><td>$\sim$</td><td>"equivalent to"</td><td>physically identical (e.g. global phase)</td><td>—</td></tr>
+<tr><td>$\in$</td><td>"in"</td><td>element of a set / range</td><td><code>x in range</code></td></tr>
+<tr><td>$\sum_k$</td><td>"sum over k"</td><td>for-loop addition</td><td><code>sum()</code></td></tr>
+<tr><td>$\otimes$</td><td>"tensor"</td><td>combine systems (Ch. 2)</td><td><code>np.kron</code></td></tr>
+<tr><td>$X,Y,Z$</td><td>Paulis</td><td>3 basic 1-qubit gates</td><td>—</td></tr>
+<tr><td>$H,S,T$</td><td>Hadamard, S, T</td><td>superposition / phase gates</td><td>—</td></tr>
+<tr><td>$R_P(\theta)$</td><td>"rotation about P by theta"</td><td>$e^{-i\theta P/2}$</td><td><code>scipy.linalg.expm</code></td></tr>
+<tr><td>$\lvert\pm\rangle$, $\lvert\pm i\rangle$</td><td>plus, minus, plus-i, minus-i</td><td>X and Y axis states</td><td>—</td></tr>
+<tr><td>$p(x)$, $\langle P\rangle$</td><td>"probability of x", "expectation of P"</td><td>measurement statistics</td><td>—</td></tr>
+</table>
+</div>
+</body>
+</html>

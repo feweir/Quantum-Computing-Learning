@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 420" font-family="Helvetica, Arial, sans-serif" font-size="14">
+  <rect width="520" height="420" fill="#ffffff"/>
+  <!-- sphere -->
+  <circle cx="260" cy="210" r="150" fill="#f4f7fb" stroke="#555" stroke-width="1.5"/>
+  <ellipse cx="260" cy="210" rx="150" ry="45" fill="none" stroke="#999" stroke-dasharray="5 4"/>
+  <!-- axes -->
+  <line x1="260" y1="210" x2="260" y2="40" stroke="#222" stroke-width="1.5"/>
+  <line x1="260" y1="210" x2="400" y2="210" stroke="#222" stroke-width="1.5"/>
+  <line x1="260" y1="210" x2="170" y2="265" stroke="#222" stroke-width="1.5"/>
+  <line x1="260" y1="210" x2="260" y2="380" stroke="#bbb" stroke-dasharray="3 3"/>
+  <!-- poles -->
+  <circle cx="260" cy="60" r="5" fill="#1f77b4"/>
+  <text x="272" y="58" fill="#1f77b4" font-weight="bold">|0⟩  (+z)</text>
+  <circle cx="260" cy="360" r="5" fill="#d62728"/>
+  <text x="272" y="372" fill="#d62728" font-weight="bold">|1⟩  (−z)</text>
+  <text x="408" y="214">|+⟩ (+x)</text>
+  <text x="105" y="280">|+i⟩ (+y)</text>
+  <!-- generic state -->
+  <line x1="260" y1="210" x2="340" y2="115" stroke="#2ca02c" stroke-width="3"/>
+  <circle cx="340" cy="115" r="5" fill="#2ca02c"/>
+  <text x="348" y="112" fill="#2ca02c" font-weight="bold">|ψ⟩</text>
+  <!-- theta arc -->
+  <path d="M260 150 A60 60 0 0 1 295 163" fill="none" stroke="#2ca02c" stroke-width="1.5"/>
+  <text x="290" y="150" fill="#2ca02c">θ</text>
+  <!-- phi arc on equator -->
+  <path d="M320 210 A60 18 0 0 1 305 224" fill="none" stroke="#9467bd" stroke-width="1.5"/>
+  <text x="318" y="232" fill="#9467bd">φ</text>
+  <text x="20" y="30" font-weight="bold" font-size="16">|ψ⟩ = cos(θ/2)|0⟩ + e^{iφ} sin(θ/2)|1⟩</text>
+  <text x="20" y="404" fill="#555" font-size="12">Poles = computational basis; equator = equal superpositions; angle φ = relative phase.</text>
+</svg>

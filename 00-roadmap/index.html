@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Roadmap — Quantum Crash Course</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<link rel="stylesheet" href="../assets/style.css">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
+<script defer src="../assets/course.js"></script>
+</head>
+<body>
+<div style="max-width:900px;margin:0 auto;padding:32px 20px 100px">
+<p><a href="../index.html">← Course home</a></p>
+<h1>Roadmap</h1>
+<p class="lead">Target: write, simulate and run quantum programs on real cloud hardware. Pace: ~1 chapter per day (2–4 h). Say <b>"next"</b> to unlock the next chapter.</p>
+
+<h2>Environment (uv)</h2>
+<pre><code>uv sync                      # create .venv from pyproject.toml / uv.lock
+uv run python 01-qubits-and-gates/code/01_bloch_sphere.py
+uv run jupyter lab           # optional</code></pre>
+<p>Installed: <code>numpy scipy matplotlib sympy qiskit qiskit-aer qiskit-ibm-runtime cirq pennylane jupyter</code>. Later: <code>amazon-braket-sdk</code>, <code>qiskit-algorithms</code>.</p>
+
+<h2>Chapter map</h2>
+<table>
+<tr><th>#</th><th>Chapter</th><th>You will be able to…</th><th>Hardware?</th></tr>
+<tr><td>1</td><td><a href="../01-qubits-and-gates/index.html">Qubits, gates, measurement, Bloch sphere</a></td><td>Write states/gates as linear algebra <em>and</em> Qiskit code</td><td>—</td></tr>
+<tr><td>2</td><td>Multi-qubit systems, entanglement, Bell/GHZ</td><td>Build entangled states, reason about tensor products</td><td>—</td></tr>
+<tr><td>3</td><td>Circuits &amp; frameworks tour (Qiskit, Cirq, PennyLane)</td><td>Same circuit in 3 frameworks, transpilation</td><td>—</td></tr>
+<tr><td>4</td><td>Deutsch–Jozsa, Bernstein–Vazirani, Simon</td><td>See quantum speedup mechanics (phase kickback, interference)</td><td>IBM free tier</td></tr>
+<tr><td>5</td><td>QFT, phase estimation, Shor</td><td>Understand period finding end to end</td><td>—</td></tr>
+<tr><td>6</td><td>Grover &amp; amplitude amplification</td><td>Implement search, oracle design</td><td>IBM</td></tr>
+<tr><td>7</td><td>Noise, errors, mitigation, QEC basics</td><td>Density matrices, noise models, ZNE, readout mitigation</td><td>IBM</td></tr>
+<tr><td>8</td><td>Variational algorithms: VQE, QAOA</td><td>Hybrid classical–quantum loops, optimisers</td><td>IBM / Braket</td></tr>
+<tr><td>9</td><td>Quantum ML &amp; PennyLane autodiff</td><td>Parameter-shift, quantum kernels</td><td>—</td></tr>
+<tr><td>10</td><td>Real cloud hardware workflow</td><td>IBM Quantum, AWS Braket, Azure — queues, Runtime primitives, cost</td><td>IBM + Braket</td></tr>
+<tr><td>11</td><td>Capstone</td><td>End-to-end project of your choice</td><td>Yes</td></tr>
+</table>
+
+<h2>Cloud accounts to create now (free, ~10 min)</h2>
+<ul>
+<li><b>IBM Quantum Platform</b> — <a href="https://quantum.cloud.ibm.com">quantum.cloud.ibm.com</a> (Open Plan: ~10 min/month of real QPU time). Create an API key + instance CRN.</li>
+<li><b>AWS Braket</b> (later, optional) — <a href="https://aws.amazon.com/braket/">aws.amazon.com/braket</a> (pay-per-shot).</li>
+<li><b>Azure Quantum</b> (optional) — <a href="https://azure.microsoft.com/products/quantum">azure.microsoft.com/products/quantum</a>.</li>
+</ul>
+<div class="warn"><p>Never commit API keys. Use <code>QiskitRuntimeService.save_account(...)</code> (stored in <code>~/.qiskit</code>) or environment variables.</p></div>
+
+<h2>Core resources</h2>
+<ul>
+<li>Nielsen &amp; Chuang, <em>Quantum Computation and Quantum Information</em> — the bible (ch. 1–2, 4–6 first).</li>
+<li><a href="https://quantum.cloud.ibm.com/learning">Qiskit learning</a> · <a href="https://quantum.cloud.ibm.com/docs">Qiskit docs</a></li>
+<li><a href="http://theory.caltech.edu/~preskill/ph229/">Preskill's notes</a> · <a href="https://scottaaronson.blog">Scott Aaronson's blog</a></li>
+<li><a href="https://quantum.country">Quantum Country</a> · <a href="https://quantumai.google/cirq">Cirq</a> · <a href="https://pennylane.ai/qml/demos">PennyLane demos</a></li>
+<li><a href="https://algassert.com/quirk">Quirk</a> (drag-and-drop simulator) · <a href="https://javafxpert.github.io/grok-bloch/">Interactive Bloch sphere</a></li>
+</ul>
+
+<h2>Chapter folder layout</h2>
+<pre><code>NN-topic/
+  index.html     the chapter (KaTeX math + interactive demos)
+  demos.js       demo code
+  latex/         compilable .tex summary
+  diagrams/      hand-written SVG
+  code/          runnable Python simulations → write to figures/
+  figures/       matplotlib PNG output</code></pre>
+</div>
+</body>
+</html>
