@@ -89,3 +89,12 @@ canvas:focus-visible { outline-offset: 0; border-radius: 8px; }
 .card span { color: var(--muted); font-size: .92rem; }
 .card.soon { opacity: .5; pointer-events: none; }
 .page { max-width: 900px; margin: 0 auto; padding: 40px 20px 100px; }
+
+/* Vercel code theme (Geist) */
+pre code { color: #ededed; }
+.tk-c { color: #a1a1a1; font-style: italic; }
+.tk-s { color: #00ca50; }
+.tk-k { color: #ff4d8d; }
+.tk-f { color: #c472fb; }
+.tk-n { color: #47a8ff; }
+.tk-p { color: #a1a1a1; }
