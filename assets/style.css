@@ -108,3 +108,12 @@ pre code { color: #ededed; }
 .hb { stroke: var(--accent3); } .hb-fill { fill: var(--accent3); }
 .hs { stroke: var(--accent2); stroke-dasharray: 5 4; stroke-width: 2 !important; } .hs-fill { fill: var(--accent2); }
 .bar.b2 > span { background: #333; }
+
+/* worked solutions */
+details { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); margin: .6em 0 1.6em; padding: 0 18px; }
+details[open] { padding-bottom: 14px; }
+summary { cursor: pointer; padding: 12px 0; font-weight: 500; list-style: none; color: var(--accent); }
+summary::-webkit-details-marker { display: none; }
+summary::before { content: "▸ "; display: inline-block; transition: transform .15s; }
+details[open] > summary::before { transform: rotate(90deg); }
+summary:hover { color: #fff; }

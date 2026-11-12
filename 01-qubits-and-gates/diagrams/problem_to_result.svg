@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 250" font-family="Helvetica, Arial, sans-serif" font-size="14">
+  <defs><marker id="a" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0 0L10 4L0 8z" fill="#333"/></marker></defs>
+  <rect width="800" height="250" fill="#fff"/>
+  <g stroke-width="1.5">
+  <rect x="15" y="40" width="165" height="110" rx="8" fill="#e8f1fb" stroke="#1f77b4"/>
+  <rect x="220" y="40" width="165" height="110" rx="8" fill="#fff6e6" stroke="#d97706"/>
+  <rect x="425" y="40" width="165" height="110" rx="8" fill="#eaf7ea" stroke="#2ca02c"/>
+  <rect x="630" y="40" width="155" height="110" rx="8" fill="#f1e8fb" stroke="#7928ca"/>
+  </g>
+  <g text-anchor="middle">
+  <text x="97" y="68" font-weight="bold">1. Question</text>
+  <text x="97" y="92">What do I want to know?</text>
+  <text x="97" y="112">state? matrix? counts?</text>
+  <text x="97" y="132">average of X, Y, Z?</text>
+  <text x="302" y="68" font-weight="bold">2. Predict (paper)</text>
+  <text x="302" y="92">draw the Bloch sphere,</text>
+  <text x="302" y="112">follow the gates,</text>
+  <text x="302" y="132">write expected numbers</text>
+  <text x="507" y="68" font-weight="bold">3. Code</text>
+  <text x="507" y="92">gates in time order</text>
+  <text x="507" y="112">+ pick the right object:</text>
+  <text x="507" y="132">Statevector / Operator / counts</text>
+  <text x="707" y="68" font-weight="bold">4. Read &amp; compare</text>
+  <text x="707" y="92">match prediction?</text>
+  <text x="707" y="112">within shot noise 1/√N?</text>
+  <text x="707" y="132">yes → done</text>
+  </g>
+  <g stroke="#333" stroke-width="1.8" fill="none" marker-end="url(#a)">
+  <line x1="180" y1="95" x2="218" y2="95"/><line x1="385" y1="95" x2="423" y2="95"/><line x1="590" y1="95" x2="628" y2="95"/>
+  <path d="M707 150 L707 215 L302 215 L302 152" stroke-dasharray="6 5"/>
+  </g>
+  <text x="505" y="236" text-anchor="middle" fill="#7928ca">no → debug: gate order? basis? global phase? noise? (checklist 8.4)</text>
+</svg>

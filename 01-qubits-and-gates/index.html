@@ -436,17 +436,168 @@ AerSimulator().run(qc, shots=1000).result().get_counts()</code></pre>
 <figure><img width="437" height="165" loading="lazy" decoding="async" src="figures/circuit_hzh.png" alt="H Z H circuit"></figure>
 
 <!-- ============================================================ 8 -->
-<h2 id="exercises">8. Exercises (60–90 min)</h2>
+<h2 id="exercises">8. Exercises: From Problem to Code to Result</h2>
+<p class="lead">The hard part is not Python, it is knowing <em>what to ask the computer</em> and <em>how to read the answer</em>. This section gives you the loop, then solves the exercises so you can see it in action.</p>
+
+<h3>8.1 The Mental Model: a Four-Step Loop</h3>
+<figure><img width="800" height="250" loading="lazy" decoding="async" src="diagrams/problem_to_result.svg" alt="Loop: question, predict on paper, code, read and compare"><figcaption>Always predict <em>before</em> you run. A result you did not predict teaches you nothing.</figcaption></figure>
 <ol>
-<li>Prove by matrix multiplication (4 entries each) that $HXH=Z$ and $HYH=-Y$; then verify with <code>Operator</code>. (Check with Demo 3 too.)</li>
-<li>Predict the Bloch vector of $\sqrt X$ applied to $|0\rangle$ (<code>qc.sx(0)</code>), then check.</li>
-<li>Starting at $|0\rangle$ and using only $H$ and $S$, find the shortest sequence reaching $|-i\rangle$.</li>
-<li>Measure in the X basis a qubit prepared as $R_y(\pi/3)|0\rangle$; compare frequencies to $\langle X\rangle=\sin(\pi/3)$. (Demo 4: θ = ⅓, φ = 0, basis X.)</li>
-<li>Write a 1-qubit simulator in plain NumPy: state vector, gate matrices, <code>np.random.choice([0,1], p=...)</code> sampling. ~20 lines.</li>
-<li>(Hard) Explain why every unitary 2×2 matrix equals the Euler form $e^{i\gamma}R_zR_yR_z$.</li>
+<li><b>Question.</b> Turn the exercise into one of four question types (table below).</li>
+<li><b>Predict on paper.</b> Use the Bloch sphere as a map: each gate is a fixed move of the arrow. Write the numbers you expect.</li>
+<li><b>Code.</b> Put the gates in the circuit in <em>time order</em>, then ask for the object that answers your question.</li>
+<li><b>Read &amp; compare.</b> Same as the prediction (within shot noise)? Done. If not, use the checklist in 8.4.</li>
 </ol>
 
-<!-- ============================================================ 9 -->
+<h3>8.2 Which Object Answers Which Question</h3>
+<table>
+<tr><th>You want to know…</th><th>Build</th><th>Ask for</th><th>How to read it</th></tr>
+<tr><td>“Which state do I end up in?”</td><td>circuit <b>without</b> <code>measure</code></td><td><code>Statevector(qc)</code></td><td><code>.data</code> = the amplitudes $[\alpha,\beta]$. <code>.probabilities()</code> = $[p(0),p(1)]$. Bloch vector from <code>expectation_value</code> of X, Y, Z (helper in the script below).</td></tr>
+<tr><td>“What matrix does this circuit equal?”</td><td>circuit without <code>measure</code></td><td><code>Operator(qc)</code></td><td><code>.data</code> = the 2×2 matrix. Compare with <code>==</code> (exact) or <code>.equiv()</code> (ignores global phase).</td></tr>
+<tr><td>“What would real hardware show?”</td><td>circuit <b>with</b> <code>measure_all()</code></td><td><code>AerSimulator().run(qc, shots=N).result().get_counts()</code></td><td>a dict <code>{'0': 3723, '1': 277}</code>: how many times each bitstring was seen out of $N$. Divide by $N$ for a probability. Order of keys is arbitrary.</td></tr>
+<tr><td>“What is the average of X (or Y, Z)?”</td><td>rotate that axis onto Z, then measure</td><td>counts, or <code>sv.expectation_value(Pauli('X'))</code></td><td>$\langle P\rangle=(n_0-n_1)/N$ — a number in $[-1,1]$. Result 0 counts as $+1$, result 1 as $-1$.</td></tr>
+</table>
+<p><b>Measuring in another basis</b> = add gates <em>before</em> the measurement: for X add <code>h</code>; for Y add <code>sdg</code> then <code>h</code>; for Z add nothing. (Hardware can only measure Z.)</p>
+<p><b>Three reading rules.</b> (1) The qubit starts in $|0\rangle$ unless you prepare it otherwise. (2) A circuit is read left to right in time, the matrix is the product right to left. (3) Statevector/Operator are “god mode” — exact numbers only a simulator can give. Counts are what a real device gives, with noise $\approx 1/\sqrt N$.</p>
+
+<h3>8.3 Worked Exercises</h3>
+<p>Try each one yourself first (5 minutes, on paper), then open the solution. Every solution follows <b>Predict → Code → Read → Check</b>. The full runnable file is <a href="code/03_exercises_worked.py"><code>code/03_exercises_worked.py</code></a>; run it with <code>uv run python 01-qubits-and-gates/code/03_exercises_worked.py</code>.</p>
+
+<p><b>Exercise 1.</b> Prove $HXH=Z$ and $HYH=-Y$, then verify with <code>Operator</code>.</p>
+<details><summary>Show worked solution</summary>
+<p><b>Question type:</b> “what matrix is this?” → <code>Operator</code>.</p>
+<p><b>Predict (by hand).</b> $H=\tfrac1{\sqrt2}\begin{pmatrix}1&1\\1&-1\end{pmatrix}$ and multiplying by $X$ on the right swaps the two columns, so $HX=\tfrac1{\sqrt2}\begin{pmatrix}1&1\\-1&1\end{pmatrix}$. Multiply by $H$: $$HXH=\tfrac12\begin{pmatrix}1&1\\-1&1\end{pmatrix}\begin{pmatrix}1&1\\1&-1\end{pmatrix}=\tfrac12\begin{pmatrix}2&0\\0&-2\end{pmatrix}=Z\ \checkmark$$ Same recipe for $Y$ gives $-Y$. Intuition: $H$ swaps the x and z axes, so flipping around x seen from the other side is flipping around z.</p>
+<p><b>Code.</b></p>
+<pre><code class="language-python">from qiskit import QuantumCircuit
+from qiskit.quantum_info import Operator
+
+hxh = QuantumCircuit(1); hxh.h(0); hxh.x(0); hxh.h(0)   # gates in time order
+hyh = QuantumCircuit(1); hyh.h(0); hyh.y(0); hyh.h(0)
+print(Operator(hxh).data.round(3))                        # READ the matrix
+print(Operator(hxh) == Operator.from_label("Z"))          # CHECK exact equality
+print(Operator(hyh) == -Operator.from_label("Y"))
+print(Operator(hyh).equiv(Operator.from_label("Y")))      # ignores global phase</code></pre>
+<p><b>Output and how to read it.</b></p>
+<pre><code>[[ 1.+0.j  0.+0.j]
+ [ 0.+0.j -1.+0.j]]       ← this is diag(1, -1) = Z   (".+0.j" just means "no imaginary part")
+True                      ← HXH == Z
+True                      ← HYH == -Y
+True                      ← HYH equals Y once the global minus sign is ignored</code></pre>
+<p><b>Check.</b> Matches the hand computation. The last line shows why $-Y$ and $Y$ are “the same gate” physically (global phase, §2) even though the matrices differ.</p>
+</details>
+
+<p><b>Exercise 2.</b> Predict the Bloch vector of $\sqrt X$ applied to $|0\rangle$ (<code>qc.sx(0)</code>), then check.</p>
+<details><summary>Show worked solution</summary>
+<p><b>Question type:</b> “which state?” → <code>Statevector</code> and its Bloch vector.</p>
+<p><b>Predict.</b> $\sqrt X$ is “half of $X$”: $X$ rotates 180° about the x axis, so $\sqrt X$ rotates 90° about x (it is $R_x(\pi/2)$ up to global phase). Start at the north pole $+z$, turn 90° around x: the arrow ends at $-y$, the state $|{-i}\rangle$. Expected Bloch vector $(0,-1,0)$.</p>
+<p><b>Code.</b></p>
+<pre><code class="language-python">import numpy as np
+from qiskit import QuantumCircuit
+from qiskit.quantum_info import Statevector, Pauli
+
+def bloch(sv):   # (&lt;X&gt;, &lt;Y&gt;, &lt;Z&gt;) of a 1-qubit state
+    return np.array([sv.expectation_value(Pauli(p)).real for p in "XYZ"]).round(3)
+
+qc = QuantumCircuit(1); qc.sx(0)
+sv = Statevector(qc)          # starts in |0> automatically
+print(sv.data.round(3))
+print(bloch(sv))</code></pre>
+<pre><code>[0.5+0.5j 0.5-0.5j]          ← amplitudes α = (1+i)/2, β = (1−i)/2   (|α|² = |β|² = 0.5)
+[ 0. -1.  0.]                ← Bloch vector = −y. Matches the prediction.</code></pre>
+<p><b>Check.</b> Probabilities are 50/50 (on the equator) and the phase between α and β points the arrow to $-y$. Measuring in Z would not reveal this; only a Y-basis measurement would.</p>
+</details>
+
+<p><b>Exercise 3.</b> Starting at $|0\rangle$ and using only $H$ and $S$, find the shortest sequence reaching $|{-i}\rangle$.</p>
+<details><summary>Show worked solution</summary>
+<p><b>Question type:</b> “which gates produce this state?” — a <em>search</em> problem. Use the Bloch sphere as a map where each gate is a known move:</p>
+<table>
+<tr><th>Gate</th><th>Move of the arrow $(x,y,z)$</th></tr>
+<tr><td>$H$</td><td>swaps x and z, flips y: $(x,y,z)\to(z,-y,x)$</td></tr>
+<tr><td>$S$</td><td>spins 90° about z: $+x\to+y\to-x\to-y\to+x$ (z stays)</td></tr>
+</table>
+<p><b>Predict.</b> Goal $-y$. $|0\rangle=+z\ \xrightarrow{H}\ +x\ \xrightarrow{S}\ +y\ \xrightarrow{H}\ -y$ ✓. So <b>H, S, H</b> (3 gates). Could 2 gates do it? $S$ does nothing to $+z$, and the only other first move is $H\to+x$; from there $H$ returns to $+z$ and $S$ gives $+y$. After two gates you can only be at $+z$, $+x$ or $+y$, never $-y$. So 3 is the minimum.</p>
+<p><b>Code</b> — let the computer confirm by trying every sequence of H and S, shortest first:</p>
+<pre><code class="language-python">import itertools, numpy as np
+from qiskit import QuantumCircuit
+from qiskit.quantum_info import Statevector
+
+target = Statevector([1/np.sqrt(2), -1j/np.sqrt(2)])      # |−i> = (|0> − i|1>)/√2
+for length in range(1, 6):
+    for seq in itertools.product("HS", repeat=length):
+        c = QuantumCircuit(1)
+        for g in seq:
+            getattr(c, g.lower())(0)                       # c.h(0) or c.s(0)
+        if Statevector(c).equiv(target):                   # equiv ignores global phase
+            print(" -> ".join(seq), f"({length} gates)")
+            raise SystemExit</code></pre>
+<pre><code>H -> S -> H (3 gates)       ← the prediction, proven minimal by exhaustive search</code></pre>
+<p><b>Check.</b> The paper reasoning (map of moves) and the brute-force search agree. Whenever a problem says “find gates that…”, predict with the sphere, then confirm with a tiny search loop.</p>
+</details>
+
+<p><b>Exercise 4.</b> Measure in the X basis a qubit prepared as $R_y(\pi/3)|0\rangle$; compare the frequencies to $\langle X\rangle=\sin(\pi/3)$.</p>
+<details><summary>Show worked solution</summary>
+<p><b>Question type:</b> “what would hardware show?” → counts, plus “average of X” → turn it into a counts statement.</p>
+<p><b>Predict.</b> $R_y(\theta)$ tilts the arrow from $+z$ toward $+x$ by $\theta$: Bloch vector $(\sin\theta,0,\cos\theta)=(0.866,0,0.5)$, so $\langle X\rangle=0.866$. Measuring X = apply $H$, then measure Z. The probability of result 0 is $p(0)=\tfrac{1+\langle X\rangle}{2}=0.933$ (why: $\langle X\rangle=p(0)-p(1)$ and $p(0)+p(1)=1$). Expect about 3732 zeros out of 4000 shots.</p>
+<p><b>Code.</b></p>
+<pre><code class="language-python">import numpy as np
+from qiskit import QuantumCircuit
+from qiskit_aer import AerSimulator
+
+qc = QuantumCircuit(1)
+qc.ry(np.pi / 3, 0)      # prepare the state (angles are in radians!)
+qc.h(0)                  # measure X  =  rotate X onto Z ...
+qc.measure_all()         # ... then an ordinary Z measurement
+shots = 4000
+counts = AerSimulator(seed_simulator=1).run(qc, shots=shots).result().get_counts()
+n0, n1 = counts.get("0", 0), counts.get("1", 0)           # .get: a key is missing if never seen
+print(counts, n0 / shots, (n0 - n1) / shots)</code></pre>
+<pre><code>{'1': 277, '0': 3723}        ← 3723 zeros, 277 ones out of 4000
+p(0)   = 0.93075             ← prediction 0.933
+&lt;X&gt;   ≈ (3723 − 277)/4000 = 0.862   ← prediction 0.866</code></pre>
+<p><b>Check.</b> Difference $0.866-0.862=0.004$. Shot noise for $N=4000$ is about $1/\sqrt{4000}\approx0.016$, so the result is well inside it: ✓. (If it had been 0.7 you would suspect a bug: forgotten $H$, wrong angle unit.)</p>
+</details>
+
+<p><b>Exercise 5.</b> Write a 1-qubit simulator in plain NumPy (state vector, gate matrices, sampling).</p>
+<details><summary>Show worked solution</summary>
+<p><b>Mental model.</b> A simulator is just the three rules from earlier: the state is a vector; each gate is <code>matrix @ state</code>; measuring samples from $|{\rm amplitude}|^2$.</p>
+<pre><code class="language-python">import numpy as np
+rng = np.random.default_rng(0)
+GATES = {"H": np.array([[1, 1], [1, -1]]) / np.sqrt(2), "X": np.array([[0, 1], [1, 0]]),
+         "Z": np.diag([1, -1]), "S": np.diag([1, 1j])}
+
+def run(circuit, shots=1000):
+    psi = np.array([1, 0], dtype=complex)            # start in |0>
+    for g in circuit:
+        psi = GATES[g] @ psi                         # gates in time order
+    probs = np.abs(psi) ** 2                         # Born rule: |amplitude|²
+    outcomes = rng.choice([0, 1], size=shots, p=probs)
+    return psi, {"0": int((outcomes == 0).sum()), "1": int((outcomes == 1).sum())}
+
+print(run(["H", "Z", "H"]))      # should behave like X
+print(run(["H"]))</code></pre>
+<pre><code>H Z H on |0> -> [0.+0.j 1.+0.j] {'0': 0, '1': 1000}     ← exactly |1>: HZH = X, all ones
+H on |0>     -> [0.707+0.j 0.707+0.j] {'0': 534, '1': 466}  ← fair coin with shot noise</code></pre>
+<p><b>Check.</b> Compare with Qiskit’s <code>AerSimulator</code>: same outcomes. This is the seed of every simulator; Qiskit adds more qubits, speed and noise models.</p>
+</details>
+
+<p><b>Exercise 6 (hard).</b> Explain why every unitary 2×2 matrix equals the Euler form $e^{i\gamma}R_zR_yR_z$. <em>Hint:</em> a unitary rotates the Bloch sphere; any rotation of a sphere can be done as “spin about z, tilt about y, spin about z again” (like yaw–pitch–roll).</p>
+
+<p><b>New exercises for you (no solutions).</b> Apply the loop: predict on the sphere, code, read, compare.</p>
+<ol start="7">
+<li>Prepare $|{+i}\rangle$ with gates, then verify by measuring in the <b>Y</b> basis that you always get 0 (hint: <code>sdg</code> then <code>h</code> before <code>measure_all</code>).</li>
+<li>Show with <code>Operator</code> that $SS=Z$ and $TT=S$. Which Bloch-sphere move explains it?</li>
+<li>Run Demo 3 (gate lab): what single gate undoes $H\to S\to T$? Verify that the combined <code>Operator</code> is the identity up to global phase.</li>
+</ol>
+
+<h3>8.4 If the Result Does Not Match Your Prediction</h3>
+<ol>
+<li><b>Gate order.</b> Circuit time order is left to right, but the matrix product is right to left. Did you write the circuit backwards?</li>
+<li><b>Basis.</b> Did you forget the rotation before measuring (<code>h</code> for X, <code>sdg</code>+<code>h</code> for Y)? Measuring Z cannot see an X-axis state.</li>
+<li><b>Global phase.</b> <code>==</code> on matrices is exact; <code>.equiv()</code> ignores a global phase. A minus sign on the whole matrix is physically the same gate.</li>
+<li><b>Shot noise.</b> Is the difference smaller than $1/\sqrt N$? Then nothing is wrong; run more shots.</li>
+<li><b>Statevector with measurement.</b> <code>Statevector(qc)</code> fails if the circuit has <code>measure</code>; build a second circuit without it.</li>
+<li><b>Units.</b> Angles are radians: write <code>np.pi/3</code>, not <code>60</code>.</li>
+</ol>
+
 <h2 id="resources">9. Resources</h2>
 <ul>
 <li>Nielsen &amp; Chuang §1.1–1.3, §2.1–2.2.</li>
