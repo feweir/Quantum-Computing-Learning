@@ -98,3 +98,13 @@ pre code { color: #ededed; }
 .tk-f { color: #c472fb; }
 .tk-n { color: #47a8ff; }
 .tk-p { color: #a1a1a1; }
+
+/* clock-hand diagrams */
+.hands { display: flex; flex-wrap: wrap; gap: 16px; justify-content: center; margin: 1.2em 0; }
+.hand { margin: 0; flex: 0 1 200px; }
+.hand svg { width: 100%; max-width: 180px; height: auto; background: #000; border: 1px solid var(--line); border-radius: 8px; }
+.hand svg line { stroke-width: 3; stroke-linecap: round; }
+.ha { stroke: var(--accent); } .ha-fill { fill: var(--accent); }
+.hb { stroke: var(--accent3); } .hb-fill { fill: var(--accent3); }
+.hs { stroke: var(--accent2); stroke-dasharray: 5 4; stroke-width: 2 !important; } .hs-fill { fill: var(--accent2); }
+.bar.b2 > span { background: #333; }

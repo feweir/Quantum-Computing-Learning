@@ -268,3 +268,100 @@
     ph.addEventListener("input", update); update();
   })();
 })();
+
+// =============================================================== Demo 5: Mach-Zehnder (appended)
+(function () {
+  const { C, num, cfmt, TAU, tex } = Q;
+  const $ = (id) => document.getElementById(id);
+  const PI = Math.PI, R2 = Math.SQRT1_2;
+  let cnt = { A: 0, B: 0, L: 0 }, N = 0, view = null;
+
+  function probs() {
+    const phi = +$("mzph").value * PI, blk = $("mzblock").value;
+    const u = blk === "upper" ? [0, 0] : [R2, 0];
+    const l = blk === "lower" ? [0, 0] : C.scale(C.exp(phi), R2);
+    const aA = C.scale(C.add(u, l), R2), aB = C.scale(C.add(u, C.scale(l, -1)), R2);
+    const pA = C.abs2(aA), pB = C.abs2(aB);
+    return { phi, blk, u, l, aA, aB, pA, pB, pL: Math.max(0, 1 - pA - pB) };
+  }
+
+  function draw(ctx, w, h) {
+    const pr = probs();
+    const X = (x) => x * w, Y = (y) => y * h;
+    const S = [0.04, 0.8], B1 = [0.2, 0.8], MU = [0.2, 0.34], ML = [0.62, 0.8], B2 = [0.62, 0.34];
+    const DA = [0.82, 0.34], DB = [0.62, 0.15];
+    const line = (a, b, col, wd) => { ctx.strokeStyle = col; ctx.lineWidth = wd; ctx.beginPath(); ctx.moveTo(X(a[0]), Y(a[1])); ctx.lineTo(X(b[0]), Y(b[1])); ctx.stroke(); };
+    const fg = Q.css("--fg"), muted = Q.css("--muted"), up = Q.css("--accent"), lo = Q.css("--accent3");
+    ctx.lineCap = "round";
+    line(S, B1, fg, 2);
+    line(B1, MU, up, 3); line(MU, B2, up, 3);
+    line(B1, ML, lo, 3); line(ML, B2, lo, 3);
+    line(B2, DA, fg, 2); line(B2, DB, fg, 2);
+    // glass slab on lower route
+    const gx = 0.41, gy = 0.8, gw = 0.07 * w, gh = 0.12 * h;
+    ctx.fillStyle = "rgba(80,227,194,0.28)"; ctx.strokeStyle = Q.css("--accent2"); ctx.lineWidth = 1.5;
+    ctx.fillRect(X(gx) - gw / 2, Y(gy) - gh / 2, gw, gh); ctx.strokeRect(X(gx) - gw / 2, Y(gy) - gh / 2, gw, gh);
+    ctx.font = "12px Geist, system-ui, sans-serif"; ctx.textAlign = "center"; ctx.fillStyle = Q.css("--accent2");
+    ctx.fillText("glass φ", X(gx), Y(gy) + gh / 2 + 16);
+    // mirrors and half-mirrors
+    const mirror = (p, sign, col, wd) => { ctx.strokeStyle = col; ctx.lineWidth = wd; const r = 0.035 * w; ctx.beginPath(); ctx.moveTo(X(p[0]) - r, Y(p[1]) + sign * r); ctx.lineTo(X(p[0]) + r, Y(p[1]) - sign * r); ctx.stroke(); };
+    mirror(MU, 1, muted, 5); mirror(ML, 1, muted, 5);
+    mirror(B1, 1, fg, 4); mirror(B2, 1, fg, 4);
+    ctx.fillStyle = muted; ctx.textAlign = "left";
+    ctx.fillText("photon in", X(S[0]), Y(S[1]) + 22);
+    ctx.fillText("half-mirror 1", X(B1[0]) + 14, Y(B1[1]) + 28);
+    ctx.fillText("half-mirror 2", X(B2[0]) + 14, Y(B2[1]) + 28);
+    ctx.fillStyle = up; ctx.fillText("upper route", X(0.3), Y(MU[1]) - 12);
+    ctx.fillStyle = lo; ctx.fillText("lower route", X(0.5), Y(ML[1]) + 28);
+    // blocker
+    if (pr.blk !== "none") {
+      const bx = pr.blk === "upper" ? [0.41, MU[1]] : [0.3, B1[1]];
+      ctx.strokeStyle = Q.css("--danger"); ctx.lineWidth = 6;
+      ctx.beginPath(); ctx.moveTo(X(bx[0]), Y(bx[1]) - 0.07 * h); ctx.lineTo(X(bx[0]), Y(bx[1]) + 0.07 * h); ctx.stroke();
+      ctx.fillStyle = Q.css("--danger"); ctx.textAlign = "center"; ctx.fillText("blocked", X(bx[0]), Y(bx[1]) - 0.1 * h);
+    }
+    // detectors, glow by true probability
+    const det = (p, name, prob, k) => {
+      const bw = 0.11 * w, bh = 0.13 * h, x = name === "A" ? X(p[0]) : X(p[0]) - bw / 2, y = name === "A" ? Y(p[1]) - bh / 2 : Y(0.01);
+      ctx.fillStyle = `rgba(255,255,255,${0.06 + 0.8 * prob})`; ctx.strokeStyle = fg; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.roundRect(x, y, bw, bh, 6); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = prob > 0.5 ? "#000" : fg; ctx.textAlign = "center"; ctx.font = "600 14px Geist, system-ui, sans-serif";
+      ctx.fillText(name, x + bw / 2, y + bh / 2 + 5);
+      ctx.fillStyle = muted; ctx.font = "12px Geist, system-ui, sans-serif";
+      ctx.fillText(`${k} clicks`, x + bw / 2, y + bh + 14);
+    };
+    det(DA, "A", pr.pA, cnt.A); det(DB, "B", pr.pB, cnt.B);
+  }
+
+  function refresh() {
+    const pr = probs();
+    $("mzph-o").textContent = num(+$("mzph").value, 2) + " π";
+    const f = (k) => (N ? k / N : 0);
+    $("mzbA").style.width = f(cnt.A) * 100 + "%"; $("mzbB").style.width = f(cnt.B) * 100 + "%"; $("mzbL").style.width = f(cnt.L) * 100 + "%";
+    $("mzbAt").textContent = `A: ${cnt.A}  (${num(f(cnt.A) * 100, 1)} %)`;
+    $("mzbBt").textContent = `B: ${cnt.B}  (${num(f(cnt.B) * 100, 1)} %)`;
+    $("mzbLt").textContent = `absorbed by blocker: ${cnt.L}`;
+    tex($("mz-out"),
+      `\\begin{aligned}` +
+      `a_A &= \\tfrac{u+l}{\\sqrt2}=${cfmt(pr.aA, 3)} \\Rightarrow p(A)=${num(pr.pA, 3)}\\\\` +
+      `a_B &= \\tfrac{u-l}{\\sqrt2}=${cfmt(pr.aB, 3)} \\Rightarrow p(B)=${num(pr.pB, 3)}` +
+      (pr.pL > 0.001 ? `\\\\ p(\\text{absorbed}) &= ${num(pr.pL, 3)}` : "") + `\\end{aligned}`, true);
+    view.redraw();
+  }
+  function reset() { cnt = { A: 0, B: 0, L: 0 }; N = 0; refresh(); }
+  function fire(n) {
+    const pr = probs();
+    for (let i = 0; i < n; i++) {
+      const r = Math.random(); N++;
+      if (r < pr.pA) cnt.A++; else if (r < pr.pA + pr.pB) cnt.B++; else cnt.L++;
+    }
+    refresh();
+  }
+  view = Q.fit($("mz-cv"), draw);
+  $("mzshots").addEventListener("click", (e) => { const b = e.target.closest("button[data-n]"); if (b) fire(+b.dataset.n); });
+  $("mzreset").addEventListener("click", reset);
+  $("mzpresets").addEventListener("click", (e) => { const b = e.target.closest("button"); if (b) { $("mzph").value = b.dataset.p; reset(); } });
+  $("mzph").addEventListener("input", reset);
+  $("mzblock").addEventListener("input", reset);
+  reset();
+})();

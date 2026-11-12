@@ -41,7 +41,7 @@
 <p class="lead">A qubit is <em>a list of two complex numbers</em>. A gate is <em>a 2×2 matrix that transforms that list</em>. That is all of it — later chapters just scale it up.</p>
 
 <div class="note">
-<p><b>How to use this page.</b> Five interactive demos (<span style="white-space:nowrap">drag the spheres to rotate the camera</span>) sit right after the concepts they illustrate. Every symbol is explained the first time it appears; the full list is in the <a href="../00-roadmap/notation.html">notation cheat sheet</a>. Run the Python versions with
+<p><b>How to use this page.</b> Six interactive demos (<span style="white-space:nowrap">drag the spheres to rotate the camera</span>) sit right after the concepts they illustrate. Every symbol is explained the first time it appears; the full list is in the <a href="../00-roadmap/notation.html">notation cheat sheet</a>. Run the Python versions with
 <code>uv run python 01-qubits-and-gates/code/01_bloch_sphere.py</code> and <code>02_measurement_qiskit.py</code>.</p>
 </div>
 
@@ -285,60 +285,101 @@ $$p(x)=|\langle x|\psi\rangle|^2,\quad x\in\{0,1\}$$
 
 <!-- ============================================================ 6 -->
 <h2 id="interference">6. Interference — Why Quantum Is Not Just “Random Bits”</h2>
+<p class="lead">Forget qubits for a minute. First a real experiment you can picture, then we map it onto gates.</p>
 
-<h3>6.1 The Puzzle</h3>
-<p>Take a classical fair coin and flip it twice in a row. Whatever you do in between, the result is 50/50: randomness never “un-randomises”.</p>
-<p>Now do the quantum version: start at $|0\rangle$, apply $H$ (a “fair coin flip”: measuring now gives 50/50), then apply $H$ <em>again</em> without measuring. Result: <b>always 0, 100&nbsp;%</b>. The matrix product explains it, $HH=I$, but the intuition is the real lesson: <b>the first $H$ was not a coin flip</b>. It created two <em>amplitudes</em>, and the second $H$ made them cancel.</p>
-<div class="note"><p><b>Common misconception.</b> “A superposition is a coin that has been flipped but not looked at yet.” That is <em>wrong</em>. If it were only ignorance about a hidden 0 or 1, a second $H$ could not bring back a certain 0. The qubit really carries both amplitudes, and amplitudes behave like waves.</p></div>
-
-<h3>6.2 The One Rule: Add Amplitudes, Then Square</h3>
+<h3>6.1 A Real Experiment: Two Half-Mirrors</h3>
+<p>A <b>half-mirror</b> (beam splitter) reflects half of the light and lets half through. Send <em>one single photon</em> at it and a detector behind each side clicks 50&nbsp;% of the time on one side, 50&nbsp;% on the other. Fair coin.</p>
+<p>Now build this (a <em>Mach–Zehnder interferometer</em>): photon → half-mirror 1 → <b>two routes</b>, upper and lower, of exactly equal length → they meet again at half-mirror 2 → detectors <b>A</b> and <b>B</b>.</p>
+<p>As a programmer you’d say: two fair coin flips in a row, so A and B each get 50&nbsp;%. Reality:</p>
 <table>
-<tr><th></th><th>Classical probabilities</th><th>Quantum amplitudes</th></tr>
-<tr><td>Several ways to reach an outcome</td><td>add the probabilities: $p=p_1+p_2$</td><td>add the <b>amplitudes</b> first: $a=a_1+a_2$, <em>then</em> $p=\lvert a\rvert^2$</td></tr>
-<tr><td>Can contributions cancel?</td><td>No — probabilities are $\ge 0$</td><td><b>Yes</b> — amplitudes are complex, e.g. $+\tfrac12$ and $-\tfrac12$</td></tr>
+<tr><th>Setup</th><th>“Marble” prediction (classical)</th><th>What real photons do</th></tr>
+<tr><td>Both routes open, equal length</td><td>A 50&nbsp;%, B 50&nbsp;%</td><td><b>A 100&nbsp;%, B 0&nbsp;%</b></td></tr>
+<tr><td>Both open + a thin glass slab in the lower route</td><td>A 50&nbsp;%, B 50&nbsp;%</td><td>anything from A 100&nbsp;% to <b>B 100&nbsp;%</b>, depending on the glass thickness</td></tr>
+<tr><td><b>Lower route blocked</b></td><td>A 25&nbsp;%, B 25&nbsp;%, 50&nbsp;% absorbed</td><td>A 25&nbsp;%, B 25&nbsp;%, 50&nbsp;% absorbed (marble-like)</td></tr>
 </table>
-<p>Analogy: two water ripples meeting. Crest + crest = a bigger wave (<b>constructive</b> interference). Crest + trough = flat water (<b>destructive</b> interference). Noise-cancelling headphones play a sound that is the exact opposite of the noise so the two waves cancel. In quantum computing the “waves” are amplitudes, and the phase $e^{i\phi}$ says where in its cycle each one is — see the complex-number arrow picture in Demo&nbsp;1.</p>
+<p>Look at rows 1 and 3. With one route blocked, detector B <em>does</em> click sometimes. Open the second route and B <em>never</em> clicks. <b>Adding a possibility removed an outcome.</b> A coin flip can never do that: extra paths can only add probability. So the photon is not “secretly taking one route at random”; both routes contribute something that can cancel.</p>
 
-<h3>6.3 Step by Step: $H$, then $P(\phi)$, then $H$</h3>
-<p>Here $P(\phi)=\mathrm{diag}(1,e^{i\phi})$ is the phase gate from §4.2: it leaves $|0\rangle$ alone and multiplies the $|1\rangle$ amplitude by $e^{i\phi}$ (rotates its arrow by $\phi$). Start in $|0\rangle$.</p>
+<h3>6.2 The Explanation: Every Route Carries a Clock Hand</h3>
+<p>Quantum mechanics gives each route a little arrow, like the hand of a clock (this is the complex-number arrow from Demo&nbsp;1). Three rules:</p>
 <ol>
-<li><b>First $H$:</b> $|0\rangle\ \to\ \tfrac1{\sqrt2}|0\rangle+\tfrac1{\sqrt2}|1\rangle$. Two amplitudes, each $\tfrac1{\sqrt2}\approx0.707$.</li>
-<li><b>Phase gate:</b> $\to\ \tfrac1{\sqrt2}|0\rangle+\tfrac{e^{i\phi}}{\sqrt2}|1\rangle$. Probabilities are still 50/50 (the arrow only rotated, its length is unchanged). The information is now hidden in the <em>relative phase</em>.</li>
-<li><b>Second $H$:</b> recall $H|0\rangle=\tfrac1{\sqrt2}(|0\rangle+|1\rangle)$ and $H|1\rangle=\tfrac1{\sqrt2}(|0\rangle-|1\rangle)$. Now there are <b>two routes</b> to finish in $|0\rangle$:
-<ul>
-<li>route A: be in $|0\rangle$ after step 2 (amplitude $\tfrac1{\sqrt2}$), then $H$ sends $|0\rangle\to|0\rangle$ with amplitude $\tfrac1{\sqrt2}$ ⇒ contribution $\tfrac12$;</li>
-<li>route B: be in $|1\rangle$ (amplitude $\tfrac{e^{i\phi}}{\sqrt2}$), then $H$ sends $|1\rangle\to|0\rangle$ with amplitude $+\tfrac1{\sqrt2}$ ⇒ contribution $\tfrac{e^{i\phi}}2$.</li>
-</ul>
-Add them, then square: $$\langle 0|\psi_\text{final}\rangle=\tfrac12\left(1+e^{i\phi}\right),\qquad p(0)=\left|\tfrac12(1+e^{i\phi})\right|^2=\tfrac14\left(2+2\cos\phi\right)=\cos^2\!\tfrac{\phi}{2}.$$
-Similarly the routes to $|1\rangle$ are $\tfrac12$ and $-\tfrac{e^{i\phi}}2$ (note the minus sign from $H|1\rangle$), giving $\tfrac12(1-e^{i\phi})$ and $p(1)=\sin^2(\phi/2)$.</li>
+<li><b>Length</b> of the hand = how strongly that route contributes. After half-mirror 1 each route has length $\tfrac1{\sqrt2}$; after half-mirror 2 each route’s contribution to a detector is $\tfrac1{\sqrt2}\cdot\tfrac1{\sqrt2}=\tfrac12$.</li>
+<li><b>Angle</b> of the hand = how far along its wave cycle that route is. The glass slab turns the hand of the lower route by an angle $\phi$ (depends on thickness). Equal-length routes without glass: $\phi=0$.</li>
+<li>To get a detector’s total, <b>walk along the hands tip to tail</b>. The straight-line distance from start to finish is the <b>amplitude</b>, and <b>probability = distance squared</b>.</li>
 </ol>
-<p>Plug in three values of $\phi$ (the symbol $\phi$ is the phase angle from §0.1):</p>
+<p>One more physical fact: at half-mirror 2, the two hands going to detector A are added as they are, but of the two going to detector B <em>one is flipped by 180°</em> (a reflection off glass flips the sign — it is the $-1$ in the Hadamard matrix). Detector A’s picture, for three glass thicknesses:</p>
+<div class="hands"><figure class="hand"><svg viewBox="0 0 150 110" role="img" aria-label="Hands pointing the same way" width="150" height="110">
+<line x1="25" y1="60" x2="75" y2="60" class="ha"/><circle cx="75" cy="60" r="4" class="ha-fill"/>
+<line x1="75" y1="60" x2="125" y2="60" class="hb"/><circle cx="125" cy="60" r="4" class="hb-fill"/>
+<line x1="25" y1="70" x2="125" y2="70" class="hs"/><circle cx="125" cy="70" r="4" class="hs-fill"/></svg><figcaption>$\phi=0$: lined up, length $1$, so $p=1$</figcaption></figure><figure class="hand"><svg viewBox="0 0 150 110" role="img" aria-label="Hands at right angles" width="150" height="110">
+<line x1="25" y1="60" x2="75" y2="60" class="ha"/><circle cx="75" cy="60" r="4" class="ha-fill"/>
+<line x1="75" y1="60" x2="75" y2="10" class="hb"/><circle cx="75" cy="10" r="4" class="hb-fill"/>
+<line x1="25" y1="70" x2="75" y2="20" class="hs"/><circle cx="75" cy="20" r="4" class="hs-fill"/></svg><figcaption>$\phi=90^\circ$: L-shape, length $0.71$, so $p=0.5$</figcaption></figure><figure class="hand"><svg viewBox="0 0 150 110" role="img" aria-label="Hands pointing opposite ways" width="150" height="110">
+<line x1="25" y1="60" x2="75" y2="60" class="ha"/><circle cx="75" cy="60" r="4" class="ha-fill"/>
+<line x1="75" y1="60" x2="25" y2="60" class="hb"/><circle cx="25" cy="60" r="4" class="hb-fill"/>
+<circle cx="25" cy="60" r="5" class="hs-fill"/></svg><figcaption>$\phi=180^\circ$: second hand walks back, length $0$, so $p=0$</figcaption></figure></div>
 <table>
-<tr><th>$\phi$</th><th>$e^{i\phi}$</th><th>route A + route B for $\lvert0\rangle$</th><th>$p(0)$</th><th>What happens</th></tr>
-<tr><td>$0$</td><td>$1$</td><td>$\tfrac12+\tfrac12=1$</td><td>1</td><td>arrows align → constructive → always 0</td></tr>
-<tr><td>$\pi/2$</td><td>$i$</td><td>$\tfrac12+\tfrac i2$, length$^2=\tfrac12$</td><td>0.5</td><td>arrows at 90° → partial → 50/50</td></tr>
-<tr><td>$\pi$</td><td>$-1$</td><td>$\tfrac12-\tfrac12=0$</td><td>0</td><td>arrows opposite → destructive → always 1</td></tr>
+<tr><th>Glass $\phi$</th><th>Detector A: hand 1 + hand 2</th><th>$p(A)$</th><th>Detector B: hand 1 + (flipped hand 2)</th><th>$p(B)$</th></tr>
+<tr><td>$0^\circ$</td><td>$\tfrac12+\tfrac12=1$</td><td><b>1</b></td><td>$\tfrac12-\tfrac12=0$</td><td><b>0</b></td></tr>
+<tr><td>$90^\circ$</td><td>$\tfrac12+\tfrac i2$, length $0.71$</td><td>0.5</td><td>$\tfrac12-\tfrac i2$, length $0.71$</td><td>0.5</td></tr>
+<tr><td>$180^\circ$</td><td>$\tfrac12-\tfrac12=0$</td><td><b>0</b></td><td>$\tfrac12+\tfrac12=1$</td><td><b>1</b></td></tr>
 </table>
+<p><b>Why blocking helps B:</b> with the lower route blocked only <em>one</em> hand of length $\tfrac12$ is left. Nothing to add, nothing to cancel: $p=(\tfrac12)^2=\tfrac14$ at each detector. The second route was the thing cancelling B.</p>
+<p>Notice that A and B always share the same total: $p(A)+p(B)=1$. Whatever “probability” A gains from the hands lining up, B loses.</p>
+<div class="note"><p><b>Probabilities vs. amplitudes.</b> A marble-world computation adds <em>probabilities</em> (always ≥&nbsp;0, never cancel). Quantum adds <em>amplitudes</em> (arrows, they can point opposite) and only then squares the length. That one change in the order of operations is all of interference.</p></div>
 
-<h3>6.4 Why This Matters</h3>
-<p>Earlier (§2) we said relative phase is <em>invisible</em> to a direct measurement. Interference is how you make it visible: sandwich a phase between two $H$ gates and it turns into a measurable 0/1 probability. Every quantum algorithm uses this pattern:</p>
+<h3>6.3 Try It Yourself</h3>
+<p>Demo&nbsp;5 is this exact experiment. Do these four things in order:</p>
 <ol>
-<li><b>Superpose</b> — $H$ puts all candidate answers in play at once;</li>
-<li><b>Mark with phases</b> — gates attach phases that depend on the answer (this is where the “computation” happens);</li>
-<li><b>Interfere</b> — a second layer of gates makes wrong answers’ amplitudes <em>cancel</em> and the right one’s <em>add up</em>;</li>
-<li><b>Measure</b> — the right answer now has high probability.</li>
+<li>Leave the defaults (glass $\phi=0$, no blocker) and fire 100 photons: A gets <em>all</em> of them.</li>
+<li>Choose “lower route” as the blocker and fire again: B is now allowed to click.</li>
+<li>Remove the blocker, drag the glass slider to $1\pi$: now B gets everything and A gets none.</li>
+<li>Set $\phi=0.5\pi$: back to a fair coin. A fair coin is just one special glass thickness.</li>
 </ol>
-<p>Grover search, Shor’s algorithm and phase estimation (Chapters 4–6) are this recipe with a cleverer middle step. Quantum computers don’t “try all answers in parallel and read the best”; they steer amplitudes so that only the good ones survive.</p>
 
-<h3>6.5 How to Use the Demo</h3>
-<ul>
-<li><b>Left canvas:</b> the amplitude of $|0\rangle$ is the sum of two arrows of length ½ (route A in blue, route B in orange, placed tip to tail). The green dashed arrow is their sum; $p(0)$ is its length squared.</li>
-<li>Drag φ from 0 to 1 π: the orange arrow swings around until it points straight back, and the sum shrinks to zero. That’s destructive interference.</li>
-<li>The table under the canvases shows the state after each gate, with numbers.</li>
-</ul>
+<div class="demo" id="demo-mz">
+  <h3><span class="tag">Demo 5</span>Two Half-Mirrors (Mach–Zehnder)</h3>
+  <p class="hint">Blue = upper route, orange = lower route, green slab = glass that turns the lower route’s hand by φ. The detectors glow in proportion to their true probability; the bars count real (simulated) photons.</p>
+  <canvas id="mz-cv" class="wide" data-aspect="0.5" role="img" aria-label="Mach-Zehnder interferometer: photon source, two half-mirrors, two routes, a glass slab and detectors A and B"></canvas>
+  <div class="demo-grid" style="grid-template-columns:minmax(240px,380px) minmax(0,1fr);margin-top:14px">
+    <div>
+      <div class="ctrl"><label for="mzph">Glass thickness φ (turns the lower hand)</label><output id="mzph-o"></output>
+        <input type="range" id="mzph" name="mzph" min="0" max="2" step="0.005" value="0"></div>
+      <div class="btns" id="mzpresets"><span style="color:var(--muted)">presets:</span>
+        <button data-p="0">φ = 0</button><button data-p="0.5">φ = ½π</button><button data-p="1">φ = π</button></div>
+      <div class="btns"><label for="mzblock" style="color:var(--muted)">block a route:</label>
+        <select id="mzblock" name="mzblock"><option value="none">none (both open)</option><option value="upper">upper route</option><option value="lower">lower route</option></select></div>
+      <div class="btns" id="mzshots">
+        <button data-n="1">+1</button><button data-n="10">+10</button><button data-n="100">+100</button><button class="primary" data-n="1000">+1000</button>
+        <button id="mzreset">Reset Counts</button></div>
+    </div>
+    <div class="readout" aria-live="polite">
+      <div class="bar"><span id="mzbA" style="width:0"></span><em id="mzbAt"></em></div>
+      <div class="bar b1"><span id="mzbB" style="width:0"></span><em id="mzbBt"></em></div>
+      <div class="bar b2"><span id="mzbL" style="width:0"></span><em id="mzbLt"></em></div>
+      <div id="mz-out"></div>
+    </div>
+  </div>
+</div>
+
+<h3>6.4 Now the Same Thing With a Qubit</h3>
+<table>
+<tr><th>Experiment</th><th>Qubit circuit</th></tr>
+<tr><td>half-mirror</td><td>Hadamard gate $H$</td></tr>
+<tr><td>upper / lower route</td><td>basis states $|0\rangle$ / $|1\rangle$</td></tr>
+<tr><td>glass slab</td><td>phase gate $P(\phi)=\mathrm{diag}(1,e^{i\phi})$ — turns only the $|1\rangle$ hand</td></tr>
+<tr><td>detector A / B</td><td>measure 0 / 1</td></tr>
+<tr><td>blocking a route</td><td>deleting that component (it never reaches the end)</td></tr>
+</table>
+<p>So the circuit $H\to P(\phi)\to H$ <em>is</em> the experiment. The arithmetic from 6.2, written with matrices:</p>
+<ol>
+<li>$H|0\rangle=\tfrac1{\sqrt2}|0\rangle+\tfrac1{\sqrt2}|1\rangle$ — two hands of length $0.71$, no angle yet.</li>
+<li>$P(\phi)$ turns the second hand: $\tfrac1{\sqrt2}|0\rangle+\tfrac{e^{i\phi}}{\sqrt2}|1\rangle$. Lengths unchanged, so still 50/50 if measured now. The information is hiding in the angle.</li>
+<li>Second $H$ sends each component to both outputs: $|0\rangle\to\tfrac1{\sqrt2}(|0\rangle+|1\rangle)$ and $|1\rangle\to\tfrac1{\sqrt2}(|0\rangle-|1\rangle)$. Collect what lands on $|0\rangle$: $\tfrac12+\tfrac{e^{i\phi}}2$; on $|1\rangle$: $\tfrac12-\tfrac{e^{i\phi}}2$.</li>
+<li>Squared lengths: $p(0)=\tfrac14|1+e^{i\phi}|^2=\tfrac14(2+2\cos\phi)=\cos^2\tfrac\phi2$ and $p(1)=\sin^2\tfrac\phi2$.</li>
+</ol>
 
 <div class="demo" id="demo-interf">
-  <h3><span class="tag">Demo 5</span>Interference: Adding Two Arrows</h3>
+  <h3><span class="tag">Demo 6</span>Same Experiment as Arrows and a Curve</h3>
   <p class="hint">Left: the amplitude of |0⟩ is the sum of two arrows of length ½ (one per “path”); the second is rotated by φ. Right: its squared length is the probability.</p>
   <div class="two">
     <canvas id="ph-cv" role="img" aria-label="Two amplitude arrows added in the complex plane" class="wide" data-aspect="0.9"></canvas>
@@ -350,6 +391,34 @@ Similarly the routes to $|1\rangle$ are $\tfrac12$ and $-\tfrac{e^{i\phi}}2$ (no
 </div>
 
 <figure><img width="857" height="566" loading="lazy" decoding="async" src="figures/interference.png" alt="interference curve from Qiskit"><figcaption>Qiskit statevector points land exactly on $\cos^2(\phi/2)$.</figcaption></figure>
+<h3>6.5 In Code</h3>
+<p>Matrices and arrows are not magic; here is the whole experiment in numpy (run it, then change <code>phi</code>):</p>
+<pre><code class="language-python">import numpy as np
+
+H = np.array([[1, 1], [1, -1]]) / np.sqrt(2)             # half-mirror
+def glass(phi): return np.diag([1, np.exp(1j * phi)])    # delays the lower route
+start = np.array([1, 0])                                 # photon enters
+
+for phi in [0, np.pi / 2, np.pi]:
+    out = H @ glass(phi) @ H @ start                     # right to left = in time order
+    print(f"phi={phi:4.2f}  P(A), P(B) =", np.round(abs(out) ** 2, 3))
+
+mid = H @ start                                          # after half-mirror 1
+blocked = np.array([mid[0], 0])                          # lower route removed
+print("lower route blocked:", np.round(abs(H @ blocked) ** 2, 3))</code></pre>
+<pre><code>phi=0.00  P(A), P(B) = [1. 0.]
+phi=1.57  P(A), P(B) = [0.5 0.5]
+phi=3.14  P(A), P(B) = [0. 1.]
+lower route blocked: [0.25 0.25]</code></pre>
+<h3>6.6 Why This Matters</h3>
+<p>Interference makes the <em>relative phase</em> from §2 measurable: sandwich a phase between two $H$ gates and it becomes a 0/1 probability. Every quantum algorithm is this recipe:</p>
+<ol>
+<li><b>Superpose</b> — $H$ puts every candidate answer in play;</li>
+<li><b>Mark with phases</b> — gates turn each answer’s hand by an amount that depends on the answer (the “computation”);</li>
+<li><b>Interfere</b> — more $H$-like gates make wrong answers’ hands cancel and the right answer’s hands add up;</li>
+<li><b>Measure</b> — the right answer now has a high probability.</li>
+</ol>
+<p>Grover, Shor and phase estimation (Chapters 4–6) are this recipe with a cleverer middle step. Quantum computers do not “try everything at once and read the best”; they steer the hands so that only good answers survive.</p>
 
 <!-- ============================================================ 7 -->
 <h2 id="qiskit">7. Qiskit Cheat Sheet</h2>
