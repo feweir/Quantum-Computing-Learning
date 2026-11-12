@@ -285,13 +285,57 @@ $$p(x)=|\langle x|\psi\rangle|^2,\quad x\in\{0,1\}$$
 
 <!-- ============================================================ 6 -->
 <h2 id="interference">6. Interference — Why Quantum Is Not Just “Random Bits”</h2>
-<p>Circuit: $H$, then $P(\phi)$, then $H$, starting from $|0\rangle$.</p>
+
+<h3>6.1 The Puzzle</h3>
+<p>Take a classical fair coin and flip it twice in a row. Whatever you do in between, the result is 50/50: randomness never “un-randomises”.</p>
+<p>Now do the quantum version: start at $|0\rangle$, apply $H$ (a “fair coin flip”: measuring now gives 50/50), then apply $H$ <em>again</em> without measuring. Result: <b>always 0, 100&nbsp;%</b>. The matrix product explains it, $HH=I$, but the intuition is the real lesson: <b>the first $H$ was not a coin flip</b>. It created two <em>amplitudes</em>, and the second $H$ made them cancel.</p>
+<div class="note"><p><b>Common misconception.</b> “A superposition is a coin that has been flipped but not looked at yet.” That is <em>wrong</em>. If it were only ignorance about a hidden 0 or 1, a second $H$ could not bring back a certain 0. The qubit really carries both amplitudes, and amplitudes behave like waves.</p></div>
+
+<h3>6.2 The One Rule: Add Amplitudes, Then Square</h3>
+<table>
+<tr><th></th><th>Classical probabilities</th><th>Quantum amplitudes</th></tr>
+<tr><td>Several ways to reach an outcome</td><td>add the probabilities: $p=p_1+p_2$</td><td>add the <b>amplitudes</b> first: $a=a_1+a_2$, <em>then</em> $p=\lvert a\rvert^2$</td></tr>
+<tr><td>Can contributions cancel?</td><td>No — probabilities are $\ge 0$</td><td><b>Yes</b> — amplitudes are complex, e.g. $+\tfrac12$ and $-\tfrac12$</td></tr>
+</table>
+<p>Analogy: two water ripples meeting. Crest + crest = a bigger wave (<b>constructive</b> interference). Crest + trough = flat water (<b>destructive</b> interference). Noise-cancelling headphones play a sound that is the exact opposite of the noise so the two waves cancel. In quantum computing the “waves” are amplitudes, and the phase $e^{i\phi}$ says where in its cycle each one is — see the complex-number arrow picture in Demo&nbsp;1.</p>
+
+<h3>6.3 Step by Step: $H$, then $P(\phi)$, then $H$</h3>
+<p>Here $P(\phi)=\mathrm{diag}(1,e^{i\phi})$ is the phase gate from §4.2: it leaves $|0\rangle$ alone and multiplies the $|1\rangle$ amplitude by $e^{i\phi}$ (rotates its arrow by $\phi$). Start in $|0\rangle$.</p>
 <ol>
-<li>$H|0\rangle = \tfrac1{\sqrt2}(|0\rangle+|1\rangle)$</li>
-<li>$P(\phi)$ → $\tfrac1{\sqrt2}(|0\rangle+e^{i\phi}|1\rangle)$ — relative phase added, still 50/50.</li>
-<li>$H$ again: the two paths recombine. The amplitude of $|0\rangle$ is $\tfrac12(1+e^{i\phi})$, so $$p(0)=\cos^2(\phi/2).$$</li>
+<li><b>First $H$:</b> $|0\rangle\ \to\ \tfrac1{\sqrt2}|0\rangle+\tfrac1{\sqrt2}|1\rangle$. Two amplitudes, each $\tfrac1{\sqrt2}\approx0.707$.</li>
+<li><b>Phase gate:</b> $\to\ \tfrac1{\sqrt2}|0\rangle+\tfrac{e^{i\phi}}{\sqrt2}|1\rangle$. Probabilities are still 50/50 (the arrow only rotated, its length is unchanged). The information is now hidden in the <em>relative phase</em>.</li>
+<li><b>Second $H$:</b> recall $H|0\rangle=\tfrac1{\sqrt2}(|0\rangle+|1\rangle)$ and $H|1\rangle=\tfrac1{\sqrt2}(|0\rangle-|1\rangle)$. Now there are <b>two routes</b> to finish in $|0\rangle$:
+<ul>
+<li>route A: be in $|0\rangle$ after step 2 (amplitude $\tfrac1{\sqrt2}$), then $H$ sends $|0\rangle\to|0\rangle$ with amplitude $\tfrac1{\sqrt2}$ ⇒ contribution $\tfrac12$;</li>
+<li>route B: be in $|1\rangle$ (amplitude $\tfrac{e^{i\phi}}{\sqrt2}$), then $H$ sends $|1\rangle\to|0\rangle$ with amplitude $+\tfrac1{\sqrt2}$ ⇒ contribution $\tfrac{e^{i\phi}}2$.</li>
+</ul>
+Add them, then square: $$\langle 0|\psi_\text{final}\rangle=\tfrac12\left(1+e^{i\phi}\right),\qquad p(0)=\left|\tfrac12(1+e^{i\phi})\right|^2=\tfrac14\left(2+2\cos\phi\right)=\cos^2\!\tfrac{\phi}{2}.$$
+Similarly the routes to $|1\rangle$ are $\tfrac12$ and $-\tfrac{e^{i\phi}}2$ (note the minus sign from $H|1\rangle$), giving $\tfrac12(1-e^{i\phi})$ and $p(1)=\sin^2(\phi/2)$.</li>
 </ol>
-<p>At $\phi=0$ the two contributions add (<b>constructive</b>) → always 0. At $\phi=\pi$ they cancel (<b>destructive</b>) → always 1. A classical coin flipped twice can't do that. This pattern — superpose, add phases, recombine — is the engine of Grover, Shor, phase estimation…</p>
+<p>Plug in three values of $\phi$ (the symbol $\phi$ is the phase angle from §0.1):</p>
+<table>
+<tr><th>$\phi$</th><th>$e^{i\phi}$</th><th>route A + route B for $\lvert0\rangle$</th><th>$p(0)$</th><th>What happens</th></tr>
+<tr><td>$0$</td><td>$1$</td><td>$\tfrac12+\tfrac12=1$</td><td>1</td><td>arrows align → constructive → always 0</td></tr>
+<tr><td>$\pi/2$</td><td>$i$</td><td>$\tfrac12+\tfrac i2$, length$^2=\tfrac12$</td><td>0.5</td><td>arrows at 90° → partial → 50/50</td></tr>
+<tr><td>$\pi$</td><td>$-1$</td><td>$\tfrac12-\tfrac12=0$</td><td>0</td><td>arrows opposite → destructive → always 1</td></tr>
+</table>
+
+<h3>6.4 Why This Matters</h3>
+<p>Earlier (§2) we said relative phase is <em>invisible</em> to a direct measurement. Interference is how you make it visible: sandwich a phase between two $H$ gates and it turns into a measurable 0/1 probability. Every quantum algorithm uses this pattern:</p>
+<ol>
+<li><b>Superpose</b> — $H$ puts all candidate answers in play at once;</li>
+<li><b>Mark with phases</b> — gates attach phases that depend on the answer (this is where the “computation” happens);</li>
+<li><b>Interfere</b> — a second layer of gates makes wrong answers’ amplitudes <em>cancel</em> and the right one’s <em>add up</em>;</li>
+<li><b>Measure</b> — the right answer now has high probability.</li>
+</ol>
+<p>Grover search, Shor’s algorithm and phase estimation (Chapters 4–6) are this recipe with a cleverer middle step. Quantum computers don’t “try all answers in parallel and read the best”; they steer amplitudes so that only the good ones survive.</p>
+
+<h3>6.5 How to Use the Demo</h3>
+<ul>
+<li><b>Left canvas:</b> the amplitude of $|0\rangle$ is the sum of two arrows of length ½ (route A in blue, route B in orange, placed tip to tail). The green dashed arrow is their sum; $p(0)$ is its length squared.</li>
+<li>Drag φ from 0 to 1 π: the orange arrow swings around until it points straight back, and the sum shrinks to zero. That’s destructive interference.</li>
+<li>The table under the canvases shows the state after each gate, with numbers.</li>
+</ul>
 
 <div class="demo" id="demo-interf">
   <h3><span class="tag">Demo 5</span>Interference: Adding Two Arrows</h3>
@@ -302,7 +346,7 @@ $$p(x)=|\langle x|\psi\rangle|^2,\quad x\in\{0,1\}$$
   </div>
   <div class="ctrl"><label for="iph">relative phase φ</label><output id="iph-o"></output>
     <input type="range" id="iph" name="iph" min="0" max="2" step="0.005" value="0.5"></div>
-  <div class="readout" aria-live="polite"><div id="i-out"></div></div>
+  <div class="readout" aria-live="polite"><div id="i-out"></div><div id="i-steps"></div></div>
 </div>
 
 <figure><img width="857" height="566" loading="lazy" decoding="async" src="figures/interference.png" alt="interference curve from Qiskit"><figcaption>Qiskit statevector points land exactly on $\cos^2(\phi/2)$.</figcaption></figure>

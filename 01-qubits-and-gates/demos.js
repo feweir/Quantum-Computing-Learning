@@ -4,6 +4,7 @@
   const $ = (id) => document.getElementById(id);
   const PI = Math.PI;
   const fmtPi = (x) => num(x, 2) + " π";
+  const sgn = (z) => { const t = ctex(z, 3); return t.startsWith("-") ? "- " + t.slice(1) : "+ " + t; };
   const deg = (r) => num((r * 180) / PI, 1);
 
   // =============================================================== Demo 1: complex plane
@@ -87,7 +88,7 @@
       const psi = [C.mul(eg, k[0]), C.mul(eg, k[1])];
       view.set(Q.bloch(psi), false);
       const p0 = C.abs2(psi[0]), p1 = C.abs2(psi[1]);
-      tex($("st-ket"), `|\\psi\\rangle = ${ctex(psi[0], 3)}\\,|0\\rangle + ${ctex(psi[1], 3)}\\,|1\\rangle`);
+      tex($("st-ket"), `|\\psi\\rangle = ${ctex(psi[0], 3)}\\,|0\\rangle ${sgn(psi[1])}\\,|1\\rangle`);
       tex($("st-amp"),
         `\\alpha: |\\alpha| = ${num(C.abs(psi[0]), 3)},\\ \\arg = ${deg(C.arg(psi[0]))}^\\circ \\qquad ` +
         `\\beta: |\\beta| = ${num(C.abs(psi[1]), 3)},\\ \\arg = ${deg(C.arg(psi[1]))}^\\circ`);
@@ -120,7 +121,7 @@
       const prod = names.length ? [...names].reverse().join("\\,") : "I";
       tex($("g-mat"), `U_{\\text{total}} = ${prod} = ${Q.matTex(total, 3)}`);
       const v = Q.bloch(psi);
-      tex($("g-state"), `|\\psi\\rangle = ${ctex(psi[0], 3)}|0\\rangle + ${ctex(psi[1], 3)}|1\\rangle,\\quad \\vec r = (${v.map((q) => num(q, 2)).join(",\\ ")})`);
+      tex($("g-state"), `|\\psi\\rangle = ${ctex(psi[0], 3)}|0\\rangle ${sgn(psi[1])}|1\\rangle,\\quad \\vec r = (${v.map((q) => num(q, 2)).join(",\\ ")})`);
     }
     function run(U, texName, rot) {
       const start = psi, my = ++token;
@@ -257,6 +258,11 @@
       $("iph-o").textContent = fmtPi(v);
       tex($("i-out"), `\\langle 0|\\psi\\rangle = \\tfrac12(1+e^{i\\phi}) = ${cfmt(amp, 3)}\\ \\Rightarrow\\ P(0)=|\\cdot|^2 = ${num(p0, 3)} = \\cos^2(\\phi/2),\\quad P(1) = ${num(1 - p0, 3)}` +
         (p0 > 0.999 ? "\\quad\\textbf{constructive}" : p0 < 0.001 ? "\\quad\\textbf{destructive}" : ""));
+      const Pg = [[[1, 0], [0, 0]], [[0, 0], C.exp(phi)]];
+      const s0 = Q.ket(0, 0), s1 = Q.apply(Q.gates.H, s0), s2 = Q.apply(Pg, s1), s3 = Q.apply(Q.gates.H, s2);
+      const row = (lab, st) => `${lab} & ${ctex(st[0], 3)}|0\\rangle ${sgn(st[1])}|1\\rangle & ${num(C.abs2(st[0]), 3)} & ${num(C.abs2(st[1]), 3)}`;
+      tex($("i-steps"), `\\begin{array}{llcc}\\text{step} & |\\psi\\rangle & P(0) & P(1) \\\\ \\hline ` +
+        [row("\\text{start}", s0), row("\\text{after first }H", s1), row("\\text{after phase }P(\\phi)", s2), row("\\text{after second }H", s3)].join(" \\\\ ") + `\\end{array}`, true);
       phasors.redraw(); curve.redraw();
     }
     ph.addEventListener("input", update); update();
