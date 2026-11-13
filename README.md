@@ -14,10 +14,10 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 uv sync
 
 # 3. Start the learning server
-uv run python -m http.server 8765
+uv run python -m http.server 8770
 ```
 
-Then open <http://localhost:8765> and start with the roadmap, then Chapter 1.
+Then open <http://localhost:8770> and start with the roadmap, then Chapter 1.
 Formulas and fonts load from CDNs (KaTeX, Google Fonts), so you need internet access.
 
 Run any simulation script with `uv run`:
